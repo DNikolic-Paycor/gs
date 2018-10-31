@@ -58,6 +58,7 @@ function getNewsPolitika($keywords, company, id) {
           // takeScreenShot(link, name +".png");
         })
       }
+      // REMOVE DUPLICATE LINKS
       var result = json1.reduce((unique, o) => {
         if (!unique.some(obj => obj.link === o.link)) {
           unique.push(o);
@@ -84,7 +85,7 @@ function getNewsPolitika($keywords, company, id) {
           }
         })
           .then(function (response) {
-            console.log("RESPONSE FROM AXIOS POLITIKA", response.data, company);
+            console.log("RESPONSE FROM AXIOS POLITIKA");
           })
       )
     } else {
