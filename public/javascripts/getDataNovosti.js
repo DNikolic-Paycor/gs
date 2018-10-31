@@ -17,8 +17,6 @@ const axios = require('axios');
 
 // EXTRACT TEXT WHEN URL IS FINDED
 
-var json = []
-
 async function takeText(link_src, company, id){
   let jsonLoc
   const instance = await phantom.create();
@@ -33,7 +31,6 @@ async function takeText(link_src, company, id){
      return $(".articleBody p").text()
   }).then(function(text){
       jsonLoc = { link_src , text }
-      // console.log("RESULT JSON","ZA KOMPOANIJU",id,json)
     })
   await instance.exit();
   return jsonLoc

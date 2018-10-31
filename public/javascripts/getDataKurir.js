@@ -1,5 +1,4 @@
 var express = require('express');
-var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 var phantom = require('phantom');
@@ -14,7 +13,6 @@ var axios = require('axios');
 //   await instance.exit()
 // }
 
-let json = []
 
 async function takeText(link_src, company, id){
   let jsonLoc
@@ -83,26 +81,9 @@ function getNewsKurir ($keywords,company,id) {
         }
       })
       .then(function (response) {
-        console.log("RESPONSE FROM AXIOS KURIR",response.data,company );
+        console.log("RESPONSE FROM AXIOS KURIR" );
       })
      )
-      
-      // for (link of result){
-      //    await takeText(link.link,company,id)
-      // }
-      // setTimeout( axios({
-      //   method:'POST',
-      //   url:'https://press-cliping.herokuapp.com/api/digitals',
-      //   data:{
-      //     company_id:id,
-      //     media_slug:"kurir",
-      //     api_key:"sdsd",
-      //     data: json
-      //   }
-      // })
-      // .then(function (response) {
-      //  console.log("RESPONSE FROM AXIOS KURIR",response.data );
-      // }),180000)
 
     } else {
       console.log("EROR", error)
