@@ -1,5 +1,4 @@
 var express = require('express');
-var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 var phantom = require('phantom');
@@ -14,8 +13,6 @@ var axios = require('axios');
 //   await instance.exit()
 // }
 
-var json = []
-
 async function takeText(link_src, company, id){
   let jsonLoc
   const instance = await phantom.create();
@@ -27,9 +24,9 @@ async function takeText(link_src, company, id){
   const content = await page.property('content');
   
   await page.evaluate(function() {
-    return $(".articleBody p").text()
+    return $(".article-body p").text()
   }).then(function(text){
-    jsonLoc = { link_src , text }
+      jsonLoc = { link_src , text }
   });
   await instance.exit();
   return jsonLoc
@@ -54,7 +51,6 @@ function getNewsBlic($keywords,company,id) {
         await $(`a[href*=${$keywords[i]}]`.toLowerCase()).each(function () {
           var text = $(this).text().replace(/[\t\n\r]/gm,'').trim()
           var link = $(this).attr('href');
-          var name = Math.random().toString(36).substring(7);
           json1.push({ text, link })
           //  PHANTOM JS SCREENSHOOT
           // takeScreenShot(link, name +".png");
@@ -70,6 +66,7 @@ function getNewsBlic($keywords,company,id) {
       const promises = []
       
       for (link of result){
+        console.log("RESULT BLIC",link)
         const  f =  takeText(link.link,company,id)
         promises.push(f)
       }
@@ -89,32 +86,11 @@ function getNewsBlic($keywords,company,id) {
         console.log("RESPONSE FROM AXIOS BLIC",response.data,company );
       })
      )
-  
-      // for (link of result) {
-      //    await takeText(link.link,company,id)
-      // }
-
-      // setTimeout( axios({
-      //   method:'POST',
-      //   url:'https://press-cliping.herokuapp.com/api/digitals',
-      //   data:{
-      //     company_id:id,
-      //     media_slug:"blic",
-      //     api_key:"sdsd",
-      //     data: json
-      //   }
-      // })
-      // .then(function (response) {
-      //  console.log("RESPONSE FROM AXIOS BLIC",response.data );
-      // }),120000)
       
     } else {
         console.log("EROR", error)
     }
-    //  console.log("BLIC", result)
   });
 }
-
-// setInterval(getNewsBlic, 15000);
 
 module.exports.getNewsBlic = getNewsBlic;

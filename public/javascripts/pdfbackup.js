@@ -236,7 +236,11 @@ function replaceText(sourceFile, targetFile, pageNumber, findText, replaceText) 
   while (readStream.notEnded()) {
     Array.prototype.push.apply(data, readStream.read(10000));
   }
+<<<<<<< HEAD
   var string = new Buffer(data).toString().replace(/t/g, "JEBI SE");
+=======
+  // var string = new Buffer(data).toString().replace(/t/g, "aa");
+>>>>>>> 8e83d79f4307ce2f299949becab01ce8afccd6f4
 
 
   //Create and write our new text object

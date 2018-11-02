@@ -3,7 +3,10 @@ var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
 var phantom = require('phantom');
+<<<<<<< HEAD
 var axios = require('axios');
+=======
+>>>>>>> 8e83d79f4307ce2f299949becab01ce8afccd6f4
 var async = require("async");
 var extract = require('pdf-text-extract');
 var hummus = require('hummus');
@@ -40,6 +43,7 @@ const write = require('fs-writefile-promise')
 // }
 var testFolder = path.join(__dirname, '/source/');
 
+<<<<<<< HEAD
 function extractPDF(keywords1, company, today) {
   let sourceArr = []
   fs.readdirSync(testFolder).forEach(file => {
@@ -91,17 +95,74 @@ function extractA(source,keywords1,company,today){
               }
         }
       });
+=======
+function extractPDF(keywords1, company, today, id) {
+  let sourceArr = []
+  // READ ALL SOURCES FROM SOURCE FOLDER AND PUSH IN ARR
+  fs.readdirSync(testFolder).forEach(file => {
+    sourceArr.push(file)
+  })
+
+  if (sourceArr.length) {
+    for (let i = 0; i < sourceArr.length; i++) {
+      // FOR EACH SOURCE START FUNCTION TO EXTRACT SINGLE PAGE WHERE KEYWORD EXIST
+      try {
+        extractA(sourceArr[i], keywords1, company, today, id);
+      }
+      catch (e) {
+        // handle the unsavoriness if needed
+      }
+    }
+  }
+}
+
+function extractA(source, keywords1, company, today, id) {
+  if (typeof source != 'undefined') {
+    var sourcePDF = path.join(__dirname, `/source/${source}`);
+    var outputFolder = path.join(__dirname, '/output/');
+    var keywords = keywords1 || [];
+
+    try {
+      extract(sourcePDF, (err, pages) => {
+        if (err) console.log(err);
+        for (let i = 0; i < pages.length; i++) {
+          let keywordsConverted = keywords1
+          // CHECKING IF PAGES ON PDF ARE ON CYRILIC IF THEY ARE WE CONVERT KEYWORDS TO CYRILIC
+          let cyr = hasCyr(pages[i])
+          if (cyr) {
+            keywordsConverted = keywords.map(word => convertToCyr(word))
+          }
+          if (keywordsConverted.some(function (v) { return pages[i].toLowerCase().indexOf(v.toLocaleLowerCase()) >= 0; })) {
+            var name = Math.random().toString(36).substring(10);
+            var pdfWriter = hummus.createWriter(path.join(outputFolder, `${today}|${company}|${id}|${source}|${name}.pdf`));
+            pdfWriter.appendPDFPagesFromPDF(sourcePDF, { type: hummus.eRangeTypeSpecific, specificRanges: [[i, i]] });
+            pdfWriter.end();
+            // CALL MODIFY() TO CREATE A HTML FROM SINGLE PDF 
+            modify(keywords, today, company);
+          }
+        }
+      });
+    } catch (e) {
+      // handle the unsavoriness if needed
+>>>>>>> 8e83d79f4307ce2f299949becab01ce8afccd6f4
     }
   }
 // END OF  EXTRACT 
+<<<<<<< HEAD
  async function modify(keywords,today,company){
    console.log("POKRENUO SE MODIFY")
+=======
+
+async function modify(keywords, today, company) {
+>>>>>>> 8e83d79f4307ce2f299949becab01ce8afccd6f4
   doc = new PDFDocument
   let source = []
   var outputFolder = path.join(__dirname, '/output/');
+
   fs.readdirSync(outputFolder).forEach(file => {
     var str = file
     var n = str.startsWith(today);
+<<<<<<< HEAD
     // console.log("STARTS WITH",n,today,str)
     source.push(file)
   })
@@ -257,18 +318,51 @@ function replaceText(sourceFile, targetFile, pageNumber, findText, replaceText) 
   objectsContext.endPDFStream(stream);
 
   objectsContext.endIndirectObject();
+=======
+    source.push(file)
+  })
+  let textArr = []
 
-  writer.end();
-}
-function strToByteArray(str) {
-  var myBuffer = [];
-  var buffer = new Buffer(str);
-  for (var i = 0; i < buffer.length; i++) {
-    myBuffer.push(buffer[i]);
+  for (let single of source) {
+    // CREATE HTML ONLY FOR PDFS THAT ARE EXTRACTED TODAY
+    var str = single
+    var n = str.startsWith(today + "|" + company);
+    if (n) {
+      const p = takeText(single, keywords, outputFolder)
+      textArr.push(p)
+    }
   }
-  return myBuffer;
+  Promise.all(textArr).then(
+    data => async.map(data, writeHmtl, function (err, results) {
+    })
+  )
 }
 
-// END OFF ANNOTATION ????????????????????????????????????????
+async function takeText(single, keywords, outputFolder) {
+  let textObj
+  doc = new PDFDocument
+  let inputFile = path.join(outputFolder, single)
+  let modified = __dirname + `/modified/${single}-modified.html`
+  let pdf = new pdftotext(inputFile);
+  const data = pdf.getTextSync(); // returns buffer
+  let text = data.toString('utf8').toLowerCase(); // bilo je 'utf8'
+>>>>>>> 8e83d79f4307ce2f299949becab01ce8afccd6f4
+
+  return textObj = { text: text, link: modified, keywords: keywords }
+}
+
+function writeHmtl(obj) {
+  let keyword = obj.keywords
+  keyword.forEach(word => {
+    if (hasCyr(obj.text)) {
+      word = convertToCyr(word)
+    }
+    obj.text = obj.text.replace(new RegExp(word, 'g'), "<span style ='color:red'><b>" + word.toUpperCase() + "</b></span>")
+  })
+  fs.writeFile(obj.link, obj.text, function (err) {
+    if (err) throw err;
+  }
+  )
+}
 
 module.exports.extractPDF = extractPDF;
