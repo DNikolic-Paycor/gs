@@ -13,7 +13,8 @@ var screpPolitika = require('./public/javascripts/getDataPolitika.js')
 var screpAlo = require('./public/javascripts/getDataAlo.js')
 var screpNovosti = require('./public/javascripts/getDataNovosti.js')
 var screpPravda = require('./public/javascripts/getDataPravda.js')
-// var extractPDF = require('./public/javascripts/extractPDF.js')
+var extractPDF = require('./public/javascripts/extractPDF.js')
+// var extractPDF = require('./public/javascripts/pdfbackup.js')
 const axios = require('axios');
 var ontime = require('ontime')
 
@@ -38,7 +39,7 @@ app.use('/', indexRouter);
 app.use('/users/', usersRouter);
 
 // let arr = []
-// let routes=`${domain_name}/javascripts/modified/${namePDF}`
+// let routes = `${domain_name}/javascripts/modified/${namePDF}`
 
 // app.get('/pdfs',express.static(__dirname + `/javascripts/modified/1c4vkn.pdf-modified.pdf`))
 
@@ -56,7 +57,7 @@ app.use(function(req, res, next) {
 /// PORTALS FOR SCREPPING , CRONE JOBS
 
 ontime({
-  cycle: [ '11:57:00' ]
+  cycle: [ '14:11:00' ]
 }, function (ot) {
   axios.get('https://press-cliping.herokuapp.com/api/companies?api_key=23')
   .then( async response =>{
@@ -82,7 +83,7 @@ ontime({
 })
 
 ontime({
-  cycle: [ '13:23:00' ]
+  cycle: [ '10:01:00' ]
 }, function (ot) {
   console.log("CRONE JOB")
   axios.get('https://press-cliping.herokuapp.com/api/companies?api_key=23')
@@ -109,9 +110,32 @@ ontime({
 })
 
 
-//PDF HANDLING
-// extractPDF.extractPDF()
-// error handler
+//--------- PDF HANDLING CRONE JOB FOR FETCHING COMPANIES
+ontime({
+  cycle: [ '12:57:00' ]
+}, function (ot) {
+  console.log("CRONE JOB PDF")
+  axios.get('https://press-cliping.herokuapp.com/api/companies?api_key=23')
+  .then( async response => {
+    if (response.data.success == true) {
+         var today = new Date();
+         var datestring = today.getDate().toString()+"-"+(today.getMonth()+1)+"-"+today.getFullYear()
+      let companies = response.data.company
+       companies.map(company => {
+         let keywords = [] 
+          company.keywords.map( word => keywords.push(word.name))
+           extractPDF.extractPDF(keywords,company.name,datestring)
+      })
+    }
+  })
+  .catch(error => {
+    console.log(error);
+  });
+  ot.done()
+  return
+})
+
+//  extractPDF.extractPDF();
 
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
