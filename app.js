@@ -14,10 +14,7 @@ var screpAlo = require('./public/javascripts/getDataAlo.js')
 var screpNovosti = require('./public/javascripts/getDataNovosti.js')
 var screpPravda = require('./public/javascripts/getDataPravda.js')
 var extractPDF = require('./public/javascripts/extractPDF.js')
-<<<<<<< HEAD
 // var extractPDF = require('./public/javascripts/pdfbackup.js')
-=======
->>>>>>> 8e83d79f4307ce2f299949becab01ce8afccd6f4
 const axios = require('axios');
 var ontime = require('ontime')
 var fs = require('fs');
